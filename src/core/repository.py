@@ -1,7 +1,7 @@
 from typing import Self, Type, TypeVar, Generic, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.base import Base
@@ -40,4 +40,8 @@ class BaseRepository(Generic[ModelType, CreateSchemaType]):
         stmt = select(self.model_type).filter_by(**kwargs)
         if many:
             return list((await self.session.scalars(stmt)).all())
+        return await self.session.scalar(stmt)
+
+    async def update(self, _id: int, **kwargs) -> Optional[ModelType]:
+        stmt = update(self.model_type).filter_by(id=_id).values(**kwargs).returning(self.model_type)
         return await self.session.scalar(stmt)

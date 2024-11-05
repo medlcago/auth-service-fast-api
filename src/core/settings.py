@@ -1,6 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -43,15 +44,24 @@ class Redis(BaseModel):
     url: str
 
 
+class SmtpServer(BaseModel):
+    username: str
+    password: str
+    host: str
+    port: int
+
+
+class Server(BaseModel):
+    host: str = "0.0.0.0"
+    port: int = 8000
+
+
 class Settings(BaseSettings):
     project_name: str = "auth-service-fast-api"
 
     debug: bool
     base_url: str
     base_dir: Path = Path(__file__).resolve().parent.parent.parent
-
-    host: str
-    port: int
 
     secret_key: str
     timeout: int = 30
@@ -61,6 +71,10 @@ class Settings(BaseSettings):
 
     db: Db
     redis: Redis
+    smtp_server: SmtpServer
+    server: Server
+
+    templates: Jinja2Templates = Jinja2Templates(directory=f"{base_dir}/templates")
 
     model_config = SettingsConfigDict(
         env_file=f"{base_dir}/.env",

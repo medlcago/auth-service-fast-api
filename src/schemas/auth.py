@@ -12,3 +12,7 @@ class SignUpSchema(BaseModel):
 class SignInSchema(BaseModel):
     username: str
     password: str
+
+
+class ConfirmEmailSchema(BaseModel):
+    code: str

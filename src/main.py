@@ -70,6 +70,6 @@ class APIServer:
 if __name__ == "__main__":
     server = APIServer()
     server.run(
-        host=settings.host,
-        port=settings.port,
+        host=settings.server.host,
+        port=settings.server.port,
     )

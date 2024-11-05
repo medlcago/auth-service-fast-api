@@ -3,7 +3,8 @@ from fastapi import APIRouter, status, Depends
 
 from api.deps import OAuth2FormDep
 from core.container import Container
-from schemas.auth import SignInSchema, SignUpSchema
+from schemas.auth import SignInSchema, SignUpSchema, ConfirmEmailSchema
+from schemas.response import Status
 from schemas.token import Token, RefreshToken
 from use_cases.auth import AuthUseCaseProtocol
 
@@ -39,3 +40,13 @@ async def refresh_token(
         auth_use_case: AuthUseCaseProtocol = Depends(Provide[Container.auth_use_case])
 ):
     return await auth_use_case.refresh_token(token=token)
+
+
+@router.post("/confirm-email/", response_model=Status)
+@inject
+async def confirm_email(
+        data: ConfirmEmailSchema,
+        auth_use_case: AuthUseCaseProtocol = Depends(Provide[Container.auth_use_case])
+):
+    response = await auth_use_case.confirm_email(data=data)
+    return response

@@ -4,7 +4,9 @@ from core.db import Database
 from core.settings import settings
 from core.uow import UnitOfWork
 from services.auth import AuthService
+from services.email import EmailService
 from services.user import UserService
+from storage.redis_store import RedisStore
 from use_cases.auth.auth_use_case import AuthUseCase
 
 
@@ -25,6 +27,11 @@ class Container(containers.DeclarativeContainer):
         pool_timeout=settings.db.pool_timeout
     )
 
+    redis = providers.Singleton(
+        RedisStore,
+        url=str(settings.redis.url)
+    )
+
     uow = providers.Factory(
         UnitOfWork,
         session=db.provided.session,
@@ -32,7 +39,8 @@ class Container(containers.DeclarativeContainer):
 
     auth_service = providers.Factory(
         AuthService,
-        uow=uow
+        uow=uow,
+        store=redis
     )
 
     user_service = providers.Factory(
@@ -40,7 +48,16 @@ class Container(containers.DeclarativeContainer):
         uow=uow
     )
 
+    email_service = providers.Singleton(
+        EmailService,
+        smtp_server=settings.smtp_server.host,
+        smtp_port=settings.smtp_server.port,
+        smtp_user=settings.smtp_server.username,
+        smtp_password=settings.smtp_server.password,
+    )
+
     auth_use_case = providers.Factory(
         AuthUseCase,
-        auth_service=auth_service
+        auth_service=auth_service,
+        email_service=email_service,
     )
